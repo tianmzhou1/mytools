@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>我的个人网站</title>
+
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <h1>我的个人网站</h1>
+    <p>这是一个只供我自己使用的静态工具站。</p>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>待办事项</h2>
+
+      <div class="todo-input">
+        <input id="todoInput" type="text" placeholder="输入一个任务" />
+        <button id="addBtn">添加</button>
+      </div>
+
+      <ul id="todoList"></ul>
+    </section>
+  </main>
+
+  <script src="./js/main.js"></script>
+</body>
+</html>
