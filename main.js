@@ -31,6 +31,37 @@ clockBtn.addEventListener("click", () => {
   renderRecords();
 });
 
+recordList.addEventListener("input", handleTimeInput);
+recordList.addEventListener("change", handleTimeInput);
+
+function handleTimeInput(event) {
+  const input = event.target;
+
+  if (!input.matches(".time-input")) return;
+
+  const record = records.find(item => item.dateKey === input.dataset.dateKey);
+  if (!record) return;
+
+  if (input.dataset.field === "startTime") {
+    if (!input.value) {
+      if (event.type === "change") {
+        renderRecords();
+      }
+
+      return;
+    }
+
+    record.startTime = parseWorkdayTime(record.dateKey, input.value);
+  }
+
+  if (input.dataset.field === "endTime") {
+    record.endTime = input.value ? parseWorkdayTime(record.dateKey, input.value) : null;
+  }
+
+  saveRecords();
+  updateWorkHours(input, record);
+}
+
 /**
  * 核心逻辑：
  * 一天从凌晨 4 点开始。
@@ -71,6 +102,33 @@ function formatTime(timestamp) {
   return `${hour}:${minute}`;
 }
 
+function formatTimeInput(timestamp) {
+  if (!timestamp) return "";
+
+  return formatTime(timestamp);
+}
+
+function parseWorkdayTime(dateKey, timeValue) {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  const [hour, minute] = timeValue.split(":").map(Number);
+  const date = new Date(year, month - 1, day, hour, minute);
+
+  if (hour < 4) {
+    date.setDate(date.getDate() + 1);
+  }
+
+  return date.getTime();
+}
+
+function updateWorkHours(input, record) {
+  const card = input.closest(".record-card");
+  const workHours = card?.querySelector(".work-hours-value");
+
+  if (workHours) {
+    workHours.textContent = calculateWorkHours(record.startTime, record.endTime);
+  }
+}
+
 function calculateWorkHours(startTime, endTime) {
   if (!startTime || !endTime) return "--";
 
@@ -98,17 +156,34 @@ function renderRecords() {
         <div class="record-grid">
           <div class="record-item">
             <div class="label">上班打卡时间</div>
-            <div class="value">${formatTime(record.startTime)}</div>
+            <input
+              class="time-input"
+              type="time"
+              step="60"
+              required
+              value="${formatTimeInput(record.startTime)}"
+              data-date-key="${record.dateKey}"
+              data-field="startTime"
+              aria-label="${formatDate(record.dateKey)} 上班打卡时间"
+            />
           </div>
 
           <div class="record-item">
             <div class="label">下班打卡时间</div>
-            <div class="value">${formatTime(record.endTime)}</div>
+            <input
+              class="time-input"
+              type="time"
+              step="60"
+              value="${formatTimeInput(record.endTime)}"
+              data-date-key="${record.dateKey}"
+              data-field="endTime"
+              aria-label="${formatDate(record.dateKey)} 下班打卡时间"
+            />
           </div>
 
           <div class="record-item full">
             <div class="label">上班时长</div>
-            <div class="value">${calculateWorkHours(record.startTime, record.endTime)}</div>
+            <div class="value work-hours-value">${calculateWorkHours(record.startTime, record.endTime)}</div>
           </div>
         </div>
       </article>
